@@ -41,7 +41,7 @@ public class HomeScreen extends Activity
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = "";
+        mTitle = "Order2gether";
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
@@ -57,8 +57,18 @@ public class HomeScreen extends Activity
             case 0:
                 frag = new CreateOrderFragment();
                 break;
-            default:
+            case 1:
                 frag = new JoinOrderFragment();
+                break;
+            case 2:
+                frag = new AccountInfo();
+                break;
+            case 3:
+                frag = new Settings();
+                break;
+            case 4:
+                //Log out page
+                frag = new CreateOrderFragment();
                 break;
         }
 
@@ -76,7 +86,7 @@ public class HomeScreen extends Activity
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setTitle(mTitle);
     }
 

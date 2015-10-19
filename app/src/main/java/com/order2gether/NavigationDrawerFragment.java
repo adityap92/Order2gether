@@ -4,6 +4,7 @@ package com.order2gether;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -245,17 +246,24 @@ public class NavigationDrawerFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Fragment frag= null;
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
 
         if(item.getItemId()==R.id.bCreateOrder){
-            Fragment frag = new CreateOrderFragment();
+            frag = new CreateOrderFragment();
         }
 
         if(item.getItemId()==R.id.bJoinOrder){
-            Fragment frag = new JoinOrderFragment();
+            frag = new JoinOrderFragment();
         }
+
+        // update the main content by replacing fragments
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, frag)
+                .commit();
         return super.onOptionsItemSelected(item);
     }
 

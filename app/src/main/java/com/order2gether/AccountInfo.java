@@ -7,18 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-
 /**
- * Created by Aditya on 10/19/2015.
+ * Created by aditya on 10/19/15.
  */
-public class CreateOrderFragment extends Fragment{
-
-    View createOrder;
+public class AccountInfo extends Fragment {
+    View rootView;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        createOrder = inflater.inflate(R.layout.create_order_fragment, container, false);
+        rootView = inflater.inflate(R.layout.account_info_fragment, container, false);
 
-        return createOrder;
+        return rootView;
     }
 }
