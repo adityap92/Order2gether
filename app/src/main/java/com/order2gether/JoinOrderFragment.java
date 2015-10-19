@@ -29,11 +29,11 @@ public class JoinOrderFragment extends Fragment {
 
         // Defined Array values to show in ListView
         String[] values = new String[] {
-                "Great Taco",
-                "CPK",
-                "Garden Burgers",
-                "Southern Bliss",
-                "Taqueria Del Sol"
+                "Great Taco - 57%",
+                "CPK - 38%",
+                "Garden Burgers - 26%",
+                "Southern Bliss - 10%",
+                "Taqueria Del Sol - 88%"
         };
 
         // Define a new Adapter
