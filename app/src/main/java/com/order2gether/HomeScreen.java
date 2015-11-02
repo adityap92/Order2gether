@@ -58,7 +58,7 @@ public class HomeScreen extends Activity
                 frag = new CreateOrderFragment();
                 break;
             case 1:
-                frag = new JoinOrderFragment();
+                frag = new MyOrders();
                 break;
             case 2:
                 frag = new AccountInfo();

@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".HomeScreen"
+            android:name=".LoginPage"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,6 +19,8 @@
                 android:name="com.google.android.geo.API_KEY"
                 android:value="AIzaSyDlNKRbmq9ge4rv3zb4kGutNoBtoYNgQEE"/>
         </activity>
+        <activity android:name=".HomeScreen"></activity>
+
     </application>
 
 </manifest>
