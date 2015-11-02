@@ -68,7 +68,8 @@ public class HomeScreen extends Activity
                 break;
             case 4:
                 //Log out page
-                frag = new CreateOrderFragment();
+                //frag = new CreateOrderFragment();
+
                 break;
         }
 

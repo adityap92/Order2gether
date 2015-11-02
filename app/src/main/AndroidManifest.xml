@@ -15,12 +15,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data
-                android:name="com.google.android.geo.API_KEY"
-                android:value="AIzaSyDlNKRbmq9ge4rv3zb4kGutNoBtoYNgQEE"/>
+
         </activity>
         <activity android:name=".HomeScreen"></activity>
-
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDlNKRbmq9ge4rv3zb4kGutNoBtoYNgQEE"/>
     </application>
-
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 </manifest>
