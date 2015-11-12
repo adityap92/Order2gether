@@ -59,6 +59,7 @@ public class JoinOrderFragment extends Fragment {
         });
 
         currentAddress = (EditText) rootView.findViewById(R.id.etCurrentAddress);
+        currentAddress.setText(addrCurr);
         currentAddress.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -137,7 +138,6 @@ public class JoinOrderFragment extends Fragment {
                             }
 
                             adapter.notifyDataSetChanged();
-
                         } catch(Exception e){
                             Log.e("JSON", e.toString());
 
@@ -147,7 +147,7 @@ public class JoinOrderFragment extends Fragment {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e("ERROR", error.toString());
-                Toast.makeText(getActivity(), "Incorrect Address", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Try Another Address", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -192,7 +192,7 @@ public class JoinOrderFragment extends Fragment {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("ERROR", error.toString());
+                Toast.makeText(getActivity(), "Try Another Address", Toast.LENGTH_SHORT).show();
             }
         });
 

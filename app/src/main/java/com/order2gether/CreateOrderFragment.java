@@ -42,15 +42,9 @@ public class CreateOrderFragment extends Fragment {
         bCreateOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (mGoogleApiClient.isConnected()) {
                     startIntentService();
                 }
-
-
-
-
-
             }
         });
 

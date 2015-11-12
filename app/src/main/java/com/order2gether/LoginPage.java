@@ -100,6 +100,7 @@ public class LoginPage extends Activity {
                                 + "&user%5Bphone%5D=" + phoneNum.trim() +"&user%5Bverified%5D=0";
 
                         // Request a string response from the provided URL.
+
                         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                                 new Response.Listener<String>() {
                                     @Override
