@@ -6,8 +6,12 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ResultReceiver;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,13 +19,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.TextView;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 
 public class HomeScreen extends Activity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -33,11 +38,20 @@ public class HomeScreen extends Activity
      */
     private CharSequence mTitle;
     private MenuItem joinOrder, createOrder;
+    GoogleApiClient mGoogleApiClient;
+    Location mLastLocation;
+    public static Double currentLat, currentLong;
+    private ResultReceiver mResultReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        buildGoogleApiClient();
         setContentView(R.layout.activity_home_screen);
+
+        if (mGoogleApiClient.isConnected()) {
+            startIntentService();
+        }
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -80,6 +94,14 @@ public class HomeScreen extends Activity
                 .commit();
     }
 
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApiIfAvailable(LocationServices.API)
+                .build();
+    }
+
     public void onSectionAttached(int number) {
         mTitle = "";
     }
@@ -118,6 +140,36 @@ public class HomeScreen extends Activity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.e("CONNECTED","CONNECTED");
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            currentLat = mLastLocation.getLatitude();
+            currentLong = mLastLocation.getLongitude();
+            Log.e("LAT AND LONG", currentLat+"");
+            Log.e("LAT AND LONG", currentLong+"");
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    protected void startIntentService() {
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        startService(intent);
     }
 
     /**

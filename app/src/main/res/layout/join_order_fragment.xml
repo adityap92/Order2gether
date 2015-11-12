@@ -2,12 +2,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/etCurrentAddress"
+            android:ems="12"
+            android:hint="Enter Address Here"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Search"
+            android:id="@+id/bSearch"/>
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Orders Near You:"
+        android:text="Restaurants Near You:"
         android:textColor="@android:color/black"
         android:id="@+id/textView"
         android:layout_marginTop="0dp"
@@ -16,7 +32,7 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/listView"
+        android:id="@+id/listView1"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 </LinearLayout>

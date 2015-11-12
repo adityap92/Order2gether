@@ -251,13 +251,13 @@ public class NavigationDrawerFragment extends Fragment {
             return true;
         }
 
-        if(item.getItemId()==R.id.bCreateOrder){
-            frag = new CreateOrderFragment();
-        }
-
-        if(item.getItemId()==R.id.bJoinOrder){
-            frag = new JoinOrderFragment();
-        }
+//        if(item.getItemId()==R.id.bCreateOrder){
+//            frag = new CreateOrderFragment();
+//        }
+//
+//        if(item.getItemId()==R.id.bJoinOrder){
+//            frag = new JoinOrderFragment();
+//        }
 
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();

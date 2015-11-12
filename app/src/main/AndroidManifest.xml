@@ -17,10 +17,21 @@
             </intent-filter>
 
         </activity>
-        <activity android:name=".HomeScreen"></activity>
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDlNKRbmq9ge4rv3zb4kGutNoBtoYNgQEE"/>
+        <activity android:name=".HomeScreen"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <!--<meta-data-->
+            <!--android:name="com.google.android.geo.API_KEY"-->
+            <!--android:value="AIzaSyDlNKRbmq9ge4rv3zb4kGutNoBtoYNgQEE"/>-->
+        <service
+            android:name=".FetchAddressIntentService"
+            android:exported="false"/>
     </application>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 </manifest>
