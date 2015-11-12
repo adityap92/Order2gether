@@ -22,6 +22,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,14 +37,18 @@ public class JoinOrderFragment extends Fragment {
     ListView listView;
     EditText currentAddress;
     JSONArray restaurantNames=new JSONArray();
+    GoogleApiClient mGoogleApiClient = HomeScreen.mGoogleApiClient;
     ArrayAdapter<String> adapter;
     Button bSearch;
     ArrayList<String> restNames = new ArrayList<String>();
+    String addrCurr;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.join_order_fragment, container, false);
+
+        addrCurr = getArguments().getString("addr");
 
         bSearch = (Button) rootView.findViewById(R.id.bSearch);
         bSearch.setOnClickListener(new View.OnClickListener() {
@@ -87,9 +92,11 @@ public class JoinOrderFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
+                //pass arguments to other fragment
                 Bundle bundle = new Bundle();
                 bundle.putString("RestName", restNames.get(position));
                 Log.e("AADFADF", restNames.get(position));
+                //add arguments to fragment
                 RestaurantMenu menu = new RestaurantMenu();
                 menu.setArguments(bundle);
                 getFragmentManager().beginTransaction().replace(R.id.container, menu).commit();
@@ -97,12 +104,60 @@ public class JoinOrderFragment extends Fragment {
             }
         });
 
+        makeFirstRequest();
 
         return rootView;
     }
 
+    private void makeFirstRequest(){
+        restNames.clear();
+
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(rootView.getContext());
+
+        String url = "http://104.131.244.218/search?location=%22"+
+                addrCurr.trim().replaceAll(" ","%20")
+                +"%22";
+        Log.e("URL", url);
+        //String url = "http://104.236.124.199/search?location=%22120%20north%20ave%20nw%22";
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //parse JSON
+                        try {
+                            Log.e("RESPONSE", response);
+                            JSONObject json = new JSONObject(response);
+
+                            for(int i = 0; i < json.names().length(); i++){
+                                JSONObject merchantID = new JSONObject(json.get(json.names().getString(i)).toString());
+                                restNames.add( merchantID.get("name").toString());
+                            }
+
+                            adapter.notifyDataSetChanged();
+
+                        } catch(Exception e){
+                            Log.e("JSON", e.toString());
+
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("ERROR", error.toString());
+                Toast.makeText(getActivity(), "Incorrect Address", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        queue.add(stringRequest);
+        Toast.makeText(getActivity(), "Loading Results!", Toast.LENGTH_LONG).show();
+    }
+
     private void makeRequest(){
         restNames.clear();
+
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(rootView.getContext());
 
@@ -137,10 +192,11 @@ public class JoinOrderFragment extends Fragment {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("ASDFAF", error.toString());
+                Log.e("ERROR", error.toString());
             }
         });
 
         queue.add(stringRequest);
+        Toast.makeText(getActivity(), "Loading Results!", Toast.LENGTH_LONG).show();
     }
 }

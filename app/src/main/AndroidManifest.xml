@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".LoginPage"
+            android:name=".HomeScreen"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -17,19 +17,20 @@
             </intent-filter>
 
         </activity>
-        <activity android:name=".HomeScreen"
+        <activity android:name=".LoginPage"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <!--<meta-data-->
-            <!--android:name="com.google.android.geo.API_KEY"-->
-            <!--android:value="AIzaSyDlNKRbmq9ge4rv3zb4kGutNoBtoYNgQEE"/>-->
         <service
             android:name=".FetchAddressIntentService"
             android:exported="false"/>
+        <!--<meta-data-->
+            <!--android:name="com.google.android.geo.API_KEY"-->
+            <!--android:value="AIzaSyCj_f9PJtGvOHoaXbK7ok-EktkDccPV_h8"/>-->
+
     </application>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>

@@ -38,10 +38,10 @@ public class HomeScreen extends Activity
      */
     private CharSequence mTitle;
     private MenuItem joinOrder, createOrder;
-    GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
     public static Double currentLat, currentLong;
-    private ResultReceiver mResultReceiver;
+
+    static GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +49,6 @@ public class HomeScreen extends Activity
         buildGoogleApiClient();
         setContentView(R.layout.activity_home_screen);
 
-        if (mGoogleApiClient.isConnected()) {
-            startIntentService();
-        }
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -94,11 +91,25 @@ public class HomeScreen extends Activity
                 .commit();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
-                .addApiIfAvailable(LocationServices.API)
+                .addApi(LocationServices.API)
                 .build();
     }
 
@@ -144,9 +155,9 @@ public class HomeScreen extends Activity
 
     @Override
     public void onConnected(Bundle bundle) {
-        Log.e("CONNECTED","CONNECTED");
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
+
         if (mLastLocation != null) {
             currentLat = mLastLocation.getLatitude();
             currentLong = mLastLocation.getLongitude();
@@ -157,20 +168,15 @@ public class HomeScreen extends Activity
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        mGoogleApiClient.connect();
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-
+        Log.e("FAILED", connectionResult.getErrorMessage());
     }
 
-    protected void startIntentService() {
-        Intent intent = new Intent(this, FetchAddressIntentService.class);
-        intent.putExtra(Constants.RECEIVER, mResultReceiver);
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
-        startService(intent);
-    }
+
 
     /**
      * A placeholder fragment containing a simple view.

@@ -24,17 +24,23 @@ public class FetchAddressIntentService extends IntentService {
     }
 
     private List<Address> addresses;
-    public ResultReceiver mReceiver;
+    protected ResultReceiver mReceiver;
     String errorMessage="errorMessage";
 
     @Override
     protected void onHandleIntent(Intent intent) {
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 
+        mReceiver = intent.getParcelableExtra(Constants.RECEIVER);
+
+        // Check if receiver was properly registered.
+        if (mReceiver == null) {
+            Log.e("Receiver", "No receiver received. There is nowhere to send the results.");
+            return;
+        }
+
         try {
             addresses = geocoder.getFromLocation(HomeScreen.currentLat, HomeScreen.currentLong, 1);
-            Log.e("LAT LONG", "LATITUDE: " + HomeScreen.currentLat);
-            Log.e("LAT LONG", "LONGITUDE: " + HomeScreen.currentLong);
         } catch (IOException e) {
             Log.e("LOCATION DIDN'T WORK", e.toString());
         }
@@ -48,18 +54,12 @@ public class FetchAddressIntentService extends IntentService {
             deliverResultToReceiver(Constants.FAILURE_RESULT, errorMessage);
         } else {
             Address address = addresses.get(0);
-            ArrayList<String> addressFragments = new ArrayList<String>();
 
-            // Fetch the address lines using getAddressLine,
-            // join them, and send them to the thread.
+            String fullAddress="";
             for(int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                addressFragments.add(address.getAddressLine(i));
-                Log.e("LOOK HERE", address.getAddressLine(i));
+                fullAddress+=address.getAddressLine(i) + " ";
             }
-            Log.e("ADFADF", "address found");
-            deliverResultToReceiver(Constants.SUCCESS_RESULT,
-                    TextUtils.join(System.getProperty("line.separator"),
-                            addressFragments));
+            deliverResultToReceiver(Constants.SUCCESS_RESULT,fullAddress);
         }
     }
 

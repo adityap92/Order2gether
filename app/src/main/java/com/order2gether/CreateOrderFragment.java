@@ -1,10 +1,12 @@
 package com.order2gether;
 
-import android.app.DownloadManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.os.AsyncTask;
+import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,50 +15,41 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.gms.appdatasearch.GetRecentContextCall;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 
 /**
  * Created by Aditya on 10/19/2015.
  */
-public class CreateOrderFragment extends Fragment{
+public class CreateOrderFragment extends Fragment {
     private View createOrder;
     private Button bCreateOrder;
     private ListView listView;
+    GoogleApiClient mGoogleApiClient = HomeScreen.mGoogleApiClient;
+    Location mLastLocation;
+    private AddressResultReceiver mResultReceiver;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         createOrder = inflater.inflate(R.layout.create_order_fragment, container, false);
 
+        mResultReceiver = new AddressResultReceiver(new Handler());
+
+
+
         bCreateOrder = (Button) createOrder.findViewById(R.id.bCreateOrderReal);
         bCreateOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment frag = new JoinOrderFragment();
 
-                // update the main content by replacing fragments
-                FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, frag)
-                        .commit();
+                if (mGoogleApiClient.isConnected()) {
+                    startIntentService();
+                }
+
+
+
+
 
             }
         });
@@ -99,6 +92,44 @@ public class CreateOrderFragment extends Fragment{
         return createOrder;
     }
 
+    private void openJoinOrder(String address){
+        //pass arguments to other fragment
+        Bundle bundle = new Bundle();
+        bundle.putString("addr", address);
+        //add arguments to fragment
+        JoinOrderFragment join = new JoinOrderFragment();
+        join.setArguments(bundle);
+        getFragmentManager().beginTransaction().replace(R.id.container, join).commit();
+    }
+
+    private void startIntentService() {
+        Intent intent = new Intent(getActivity(), FetchAddressIntentService.class);
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        getActivity().startService(intent);
+    }
+    /**
+     * Receiver for data sent from FetchAddressIntentService.
+     */
+    class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        /**
+         *  Receives data sent from FetchAddressIntentService and updates the UI in MainActivity.
+         */
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            String result="";
+            // Show a toast message if an address was found.
+            if (resultCode == Constants.SUCCESS_RESULT) {
+                result=resultData.getString(Constants.RESULT_DATA_KEY);
+                openJoinOrder(result);
+            }
+
+        }
+    }
 }
 
 
