@@ -36,11 +36,10 @@ public class JoinOrderFragment extends Fragment {
     View rootView;
     ListView listView;
     EditText currentAddress;
-    JSONArray restaurantNames=new JSONArray();
-    GoogleApiClient mGoogleApiClient = HomeScreen.mGoogleApiClient;
     ArrayAdapter<String> adapter;
     Button bSearch;
     ArrayList<String> restNames = new ArrayList<String>();
+    ArrayList<String> merchID = new ArrayList<String>();
     String addrCurr;
 
     @Nullable
@@ -96,6 +95,8 @@ public class JoinOrderFragment extends Fragment {
                 //pass arguments to other fragment
                 Bundle bundle = new Bundle();
                 bundle.putString("RestName", restNames.get(position));
+                bundle.putString("merchID", merchID.get(position));
+                bundle.putString("currAddr", addrCurr);
                 Log.e("AADFADF", restNames.get(position));
                 //add arguments to fragment
                 RestaurantMenu menu = new RestaurantMenu();
@@ -112,6 +113,7 @@ public class JoinOrderFragment extends Fragment {
 
     private void makeFirstRequest(){
         restNames.clear();
+        merchID.clear();
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(rootView.getContext());
@@ -135,6 +137,7 @@ public class JoinOrderFragment extends Fragment {
                             for(int i = 0; i < json.names().length(); i++){
                                 JSONObject merchantID = new JSONObject(json.get(json.names().getString(i)).toString());
                                 restNames.add( merchantID.get("name").toString());
+                                merchID.add(json.names().getString(i));
                             }
 
                             adapter.notifyDataSetChanged();

@@ -11,4 +11,9 @@
         android:id="@+id/tvMenuName"
         android:background="@android:color/holo_blue_light"/>
 
+    <ExpandableListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lvMenu"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>
