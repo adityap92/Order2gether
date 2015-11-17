@@ -101,7 +101,7 @@ public class JoinOrderFragment extends Fragment {
                 //add arguments to fragment
                 RestaurantMenu menu = new RestaurantMenu();
                 menu.setArguments(bundle);
-                getFragmentManager().beginTransaction().replace(R.id.container, menu).commit();
+                getFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.container, menu).commit();
 
             }
         });

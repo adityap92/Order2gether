@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 
+import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -37,7 +38,6 @@ public class HomeScreen extends Activity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-    private MenuItem joinOrder, createOrder;
     Location mLastLocation;
     public static Double currentLat, currentLong;
 
@@ -79,16 +79,29 @@ public class HomeScreen extends Activity
                 break;
             case 4:
                 //Log out page
-                //frag = new CreateOrderFragment();
-
+                LoginManager.getInstance().logOut();
+                finish();
                 break;
         }
 
         // update the main content by replacing fragments
+        if(frag!=null){
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
+                .addToBackStack(null)
                 .replace(R.id.container, frag)
                 .commit();
+        }
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getFragmentManager().getBackStackEntryCount() == 0) {
+            this.finish();
+        } else {
+            getFragmentManager().popBackStack();
+        }
     }
 
     @Override
@@ -102,6 +115,10 @@ public class HomeScreen extends Activity
         super.onStop();
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
+        }
+        if(LoginManager.getInstance()!=null){
+            LoginManager.getInstance().logOut();
+
         }
     }
 

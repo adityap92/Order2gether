@@ -3,21 +3,14 @@ package com.order2gether;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -26,8 +19,16 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
-import java.util.Set;
+import java.util.Arrays;
+
 
 /**
  * Created by aditya on 10/31/15.
@@ -36,37 +37,46 @@ public class LoginPage extends Activity {
 
     EditText username, pass;
     Button login, signup;
+    CallbackManager callbackManager;
+    LoginButton loginButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        callbackManager = CallbackManager.Factory.create();
+
+        LoginManager.getInstance().registerCallback(callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        Toast.makeText(LoginPage.this, "Login Success", Toast.LENGTH_SHORT).show();
+                        openHome();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        Toast.makeText(LoginPage.this, "Login Cancelled", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(FacebookException exception) {
+                        Toast.makeText(LoginPage.this, exception.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
         setContentView(R.layout.login_fragment);
 
-        username = (EditText) findViewById(R.id.etEmail);
-        pass = (EditText) findViewById(R.id.etPassword);
-        login = (Button) findViewById(R.id.bLogin);
-        signup = (Button) findViewById(R.id.bSignup);
-
-
-
-        login.setOnClickListener(new View.OnClickListener() {
+        loginButton = (LoginButton) findViewById(R.id.login_button);
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               /* if (username.getText().length() == 0 || pass.getText().length() == 0) {
+                if(LoginManager.getInstance()==null){
+                    LoginManager.getInstance().logInWithReadPermissions(LoginPage.this, Arrays.asList("public_profile", "user_friends"));
+                }else
+                    LoginManager.getInstance().logOut();
+            }
+        });
 
-                    CharSequence text = "Incorrect username/password";
-                    Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
-                    toast.show();
-                }*/
-                openHome();
-            }
-        });
-        signup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signupFrag();
-            }
-        });
     }
 
     public void openHome(){
@@ -128,16 +138,9 @@ public class LoginPage extends Activity {
         builder.show();
     }
 
-
-    private boolean signup(String name, String phoneNum, String venmo, String passwd, String emailID){
-        return false;
-    }
-
-    private boolean verifyEmail(String emailID, String verificationCode){
-        return false;
-    }
-
-    private boolean authenticate(String emailID, String passwd){
-        return false;
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }

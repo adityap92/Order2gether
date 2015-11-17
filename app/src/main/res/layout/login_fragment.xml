@@ -3,46 +3,15 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical"
-    android:id="@+id/layoutLogin">
+    android:id="@+id/layoutLogin"
+    android:background="@drawable/pizza">
 
-    <EditText
-        android:layout_width="match_parent"
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:hint="email"
-        android:text="a"
-        android:id="@+id/etEmail"
         android:layout_gravity="center_horizontal"
-        android:background="@color/White"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp" />
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:hint="password"
-        android:ems="10"
-        android:text="a"
-        android:id="@+id/etPassword"
-        android:background="@color/White"/>
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center">
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Login"
-        android:id="@+id/bLogin"
-        android:layout_gravity="center_horizontal" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sign Up"
-        android:id="@+id/bSignup"
-        android:layout_gravity="center_horizontal" />
-</LinearLayout>
 </LinearLayout>

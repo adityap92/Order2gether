@@ -93,7 +93,7 @@ public class CreateOrderFragment extends Fragment {
         //add arguments to fragment
         JoinOrderFragment join = new JoinOrderFragment();
         join.setArguments(bundle);
-        getFragmentManager().beginTransaction().replace(R.id.container, join).commit();
+        getFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.container, join).commit();
     }
 
     private void startIntentService() {
