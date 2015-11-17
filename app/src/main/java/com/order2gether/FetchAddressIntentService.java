@@ -40,7 +40,7 @@ public class FetchAddressIntentService extends IntentService {
         }
 
         try {
-            addresses = geocoder.getFromLocation(HomeScreen.currentLat, HomeScreen.currentLong, 1);
+            addresses = geocoder.getFromLocation(LoginPage.currentLat, LoginPage.currentLong, 1);
         } catch (IOException e) {
             Log.e("LOCATION DIDN'T WORK", e.toString());
         }

@@ -27,7 +27,7 @@ import com.google.android.gms.location.LocationServices;
 
 
 public class HomeScreen extends Activity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -38,21 +38,17 @@ public class HomeScreen extends Activity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-    Location mLastLocation;
-    public static Double currentLat, currentLong;
-
-    static GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        buildGoogleApiClient();
-        setContentView(R.layout.activity_home_screen);
 
+        setContentView(R.layout.activity_home_screen);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = "Order2gether";
+
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
@@ -104,32 +100,6 @@ public class HomeScreen extends Activity
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-        if(LoginManager.getInstance()!=null){
-            LoginManager.getInstance().logOut();
-
-        }
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
     public void onSectionAttached(int number) {
         mTitle = "";
     }
@@ -169,30 +139,6 @@ public class HomeScreen extends Activity
 
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-
-        if (mLastLocation != null) {
-            currentLat = mLastLocation.getLatitude();
-            currentLong = mLastLocation.getLongitude();
-            Log.e("LAT AND LONG", currentLat+"");
-            Log.e("LAT AND LONG", currentLong+"");
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.e("FAILED", connectionResult.getErrorMessage());
-    }
-
 
 
     /**

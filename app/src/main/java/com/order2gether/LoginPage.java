@@ -5,7 +5,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +29,10 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.Arrays;
 
@@ -33,24 +40,29 @@ import java.util.Arrays;
 /**
  * Created by aditya on 10/31/15.
  */
-public class LoginPage extends Activity {
+public class LoginPage extends Activity implements GoogleApiClient.ConnectionCallbacks, OnConnectionFailedListener{
 
-    EditText username, pass;
-    Button login, signup;
     CallbackManager callbackManager;
     LoginButton loginButton;
+    private AddressResultReceiver mResultReceiver;
+    Location mLastLocation;
+    public static Double currentLat, currentLong;
+    static GoogleApiClient mGoogleApiClient;
+    public static String currentAddress="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        buildGoogleApiClient();
         FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
+
+        mResultReceiver = new AddressResultReceiver(new Handler());
 
         LoginManager.getInstance().registerCallback(callbackManager,
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
-                        Toast.makeText(LoginPage.this, "Login Success", Toast.LENGTH_SHORT).show();
                         openHome();
                     }
 
@@ -70,12 +82,16 @@ public class LoginPage extends Activity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(LoginManager.getInstance()==null){
+                if (LoginManager.getInstance() == null) {
                     LoginManager.getInstance().logInWithReadPermissions(LoginPage.this, Arrays.asList("public_profile", "user_friends"));
-                }else
+                } else
                     LoginManager.getInstance().logOut();
             }
         });
+
+        if(mGoogleApiClient.isConnected())
+            startIntentService();
+
 
     }
 
@@ -83,6 +99,14 @@ public class LoginPage extends Activity {
         Intent intent = new Intent(this, HomeScreen.class);
         startActivity(intent);
 
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 
     public void signupFrag(){
@@ -142,5 +166,79 @@ public class LoginPage extends Activity {
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void startIntentService() {
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        startService(intent);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+        if(LoginManager.getInstance()!=null){
+            LoginManager.getInstance().logOut();
+
+        }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+
+        if (mLastLocation != null) {
+            currentLat = mLastLocation.getLatitude();
+            currentLong = mLastLocation.getLongitude();
+            Log.e("LAT AND LONG", currentLat+"");
+            Log.e("LAT AND LONG", currentLong+"");
+        }
+        startIntentService();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e("FAILED", connectionResult.getErrorMessage());
+    }
+
+    /**
+     * Receiver for data sent from FetchAddressIntentService.
+     */
+    class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        /**
+         *  Receives data sent from FetchAddressIntentService and updates the UI in MainActivity.
+         */
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            String result="";
+            // Show a toast message if an address was found.
+            if (resultCode == Constants.SUCCESS_RESULT) {
+                result=resultData.getString(Constants.RESULT_DATA_KEY);
+                //current address here
+                currentAddress = result;
+                Log.e("CURRENT ADDRESS IS:", result);
+            }
+
+        }
     }
 }

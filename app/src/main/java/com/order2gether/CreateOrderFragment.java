@@ -15,8 +15,20 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 
 /**
@@ -26,40 +38,35 @@ public class CreateOrderFragment extends Fragment {
     private View createOrder;
     private Button bCreateOrder;
     private ListView listView;
-    GoogleApiClient mGoogleApiClient = HomeScreen.mGoogleApiClient;
-    Location mLastLocation;
-    private AddressResultReceiver mResultReceiver;
+    GoogleApiClient mGoogleApiClient = LoginPage.mGoogleApiClient;
+
+
+    ArrayAdapter<String> adapter;
+    ArrayList<String> nearbyRestaurants = new ArrayList<String>();
+    String merchID="";
+    String merchName="";
+    String currAddress=LoginPage.currentAddress;
+    RequestQueue queue;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         createOrder = inflater.inflate(R.layout.create_order_fragment, container, false);
 
-        mResultReceiver = new AddressResultReceiver(new Handler());
-
-
-
         bCreateOrder = (Button) createOrder.findViewById(R.id.bCreateOrderReal);
         bCreateOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mGoogleApiClient.isConnected()) {
-                    startIntentService();
-                }
+                openJoinOrder(currAddress);
             }
         });
-
 
         // Get ListView object from xml
         listView = (ListView) createOrder.findViewById(R.id.listView);
 
         // Defined Array values to show in ListView
-        String[] values = new String[] {
-                "Great Taco - 57%",
-                "CPK - 38%",
-                "Garden Burgers - 26%",
-                "Southern Bliss - 10%",
-                "Taqueria Del Sol - 88%"
-        };
+        nearbyRestaurants.clear();
+        nearbyRestaurants.add("Loading Orders..");
+
 
         // Define a new Adapter
         // First parameter - Context
@@ -67,8 +74,8 @@ public class CreateOrderFragment extends Fragment {
         // Third parameter - ID of the TextView to which the data is written
         // Forth - the Array of data
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, values);
+        adapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_list_item_1, android.R.id.text1, nearbyRestaurants);
 
 
         // Assign adapter to ListView
@@ -83,7 +90,88 @@ public class CreateOrderFragment extends Fragment {
             }
         });
 
+        getNearbyOrders(currAddress);
+
+
         return createOrder;
+    }
+
+    private void getNearbyOrders(String address) {
+
+
+        // Instantiate the RequestQueue.
+        queue = Volley.newRequestQueue(createOrder.getContext());
+
+        String url = "http://104.131.244.218/orderbylocation?user_location=%22" + address.trim().replaceAll(" ","%20")+ "%22";
+        Log.e("URL", url);
+
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //parse JSON
+                        try {
+                            Log.e("RESPONSE ID", response);
+                            JSONArray json = new JSONArray(response);
+
+                            merchID = json.getJSONObject(0).getString("merchantID");
+                            Log.e("MERCH ID:", merchID);
+
+                            getRestaurantName();
+
+                        } catch (Exception e) {
+                            Log.e("JSON", e.toString());
+
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("ERROR", error.toString());
+            }
+        });
+
+        queue.add(stringRequest);
+
+    }
+
+    private void getRestaurantName(){
+        String url1 = "http://sandbox.delivery.com/merchant/" + merchID + "/?client_id=MTExNTBjNTgyOGQ0NTFiOTc0ZWI1MTg1MGQ3NmYxYjE3";
+        Log.e("URL", url1);
+
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest1 = new StringRequest(Request.Method.GET, url1,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //parse JSON
+                        try {
+                            Log.e("RESPONSE Name", response);
+                            JSONObject json = new JSONObject(response);
+                            JSONObject merchant = json.getJSONObject("merchant");
+                            JSONObject merchantName = merchant.getJSONObject("summary");
+                            merchName = merchantName.getString("name");
+                            nearbyRestaurants.clear();
+                            nearbyRestaurants.add(merchName);
+                            Log.e("MERCH NAME:", merchName);
+
+                            adapter.notifyDataSetChanged();
+                        } catch (Exception e) {
+                            Log.e("JSON", e.toString());
+
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("ERROR", error.toString());
+            }
+        });
+
+        queue.add(stringRequest1);
     }
 
     private void openJoinOrder(String address){
@@ -96,34 +184,7 @@ public class CreateOrderFragment extends Fragment {
         getFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.container, join).commit();
     }
 
-    private void startIntentService() {
-        Intent intent = new Intent(getActivity(), FetchAddressIntentService.class);
-        intent.putExtra(Constants.RECEIVER, mResultReceiver);
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
-        getActivity().startService(intent);
-    }
-    /**
-     * Receiver for data sent from FetchAddressIntentService.
-     */
-    class AddressResultReceiver extends ResultReceiver {
-        public AddressResultReceiver(Handler handler) {
-            super(handler);
-        }
 
-        /**
-         *  Receives data sent from FetchAddressIntentService and updates the UI in MainActivity.
-         */
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            String result="";
-            // Show a toast message if an address was found.
-            if (resultCode == Constants.SUCCESS_RESULT) {
-                result=resultData.getString(Constants.RESULT_DATA_KEY);
-                openJoinOrder(result);
-            }
-
-        }
-    }
 }
 
 

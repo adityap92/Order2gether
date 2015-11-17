@@ -38,12 +38,8 @@ public class RestaurantMenu extends Fragment {
 
     View restaurantMenu;
     private TextView restaurantName;
-    String addrCurr;
-    String merchID;
-    ListView lvMenu;
-    ArrayAdapter<String> adapter;
-    ArrayList<String> menuItems;
-    ArrayList<String> menuTypes;
+    String addrCurr, merchID;
+    ArrayList<String> menuItems, menuTypes;
     JSONArray menuGenre= new JSONArray();
     ExpandableListAdapter listAdapter;
     ExpandableListView expListView;
