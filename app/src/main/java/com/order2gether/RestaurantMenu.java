@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,12 +40,15 @@ public class RestaurantMenu extends Fragment {
     View restaurantMenu;
     private TextView restaurantName;
     String addrCurr, merchID;
-    ArrayList<String> menuItems, menuTypes;
+    ArrayList<String> menuItems, menuTypes, menuIDs, menuPrice, menuDescr;
     JSONArray menuGenre= new JSONArray();
     ExpandableListAdapter listAdapter;
     ExpandableListView expListView;
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
+    String selItemName="";
+    JSONArray menu;
+    NumberPicker np;
 
     @Nullable
     @Override
@@ -53,6 +57,11 @@ public class RestaurantMenu extends Fragment {
 
         menuItems = new ArrayList<String>();
         menuTypes = new ArrayList<String>();
+        menuIDs = new ArrayList<String>();
+        menuDescr = new ArrayList<String>();
+        menuPrice = new ArrayList<String>();
+
+
 
         expListView = (ExpandableListView) restaurantMenu.findViewById(R.id.lvMenu);
 
@@ -66,28 +75,73 @@ public class RestaurantMenu extends Fragment {
             public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                // Get the layout inflater
-                final LayoutInflater inflater = getActivity().getLayoutInflater();
 
-                // Inflate and set the layout for the dialog
-                // Pass null as the parent view because its going in the dialog layout
-                builder.setView(inflater.inflate(R.layout.item_fragment, null))
+                // Get the layout inflater
+                View view = LayoutInflater.from(getActivity()).inflate(R.layout.item_fragment, null);
+                np = (NumberPicker) view.findViewById(R.id.numPicker);
+                selItemName = listDataChild.get(
+                        listDataHeader.get(groupPosition)).get(
+                        childPosition);
+
+                builder.setView(view)
                         // Add action buttons
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
-                                Toast.makeText(getActivity().getApplicationContext(),
-                                        "Item added to Cart!", Toast.LENGTH_SHORT).show();
+
+                                for(int j =0 ; j< menu.length() ;j++) {
+                                    //headers
+                                    try {
+                                        //get menutype from menu
+                                        JSONObject menu_genre = menu.getJSONObject(j);
+                                        //add menutype name to the listdataheader
+                                        String menu_genre_name = menu_genre.getString("name");
+
+                                        List<String> menu_items = new ArrayList<>();
+
+                                        //get children of menutype
+                                        JSONArray menu_item_array = menu_genre.getJSONArray("children");
+
+                                        //for each child in menugenre, add to the listdata child
+                                        for (int item_index = 0; item_index < menu_item_array.length(); item_index++) {
+                                            //menu item name
+                                            String menu_item_name = menu_item_array.getJSONObject(item_index).getString("name");
+                                            if(menu_item_name.equals(selItemName)){
+                                                String name = menu_item_name;
+                                                String itemId = menu_item_array.getJSONObject(item_index).getString("id");
+                                                String description = menu_item_array.getJSONObject(item_index).getString("description");
+                                                String price = menu_item_array.getJSONObject(item_index).getString("price");
+
+                                                if(np.getValue()>0)
+                                                    HomeScreen.cart.addToCart(name, itemId, description, Double.parseDouble(price), np.getValue());
+                                                break;
+                                            }
+                                        }
+                                    } catch (Exception e) {
+
+                                    }
+                                }
+                                    Toast.makeText(getActivity().getApplicationContext(),
+                                            "Item added to Cart!", Toast.LENGTH_SHORT).show();
+                                Log.e("NUM ITEMS IN CART:", HomeScreen.cart.size()+"");
+
                             }
                         })
                         .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-
                             }
                         })
                         .setTitle(listDataChild.get(
                                 listDataHeader.get(groupPosition)).get(
                                 childPosition));
+
+
+
+
+                np.setMinValue(0);
+                np.setMaxValue(5);
+                np.setWrapSelectorWheel(false);
+
                 builder.show();
                 return false;
             }
@@ -103,6 +157,8 @@ public class RestaurantMenu extends Fragment {
         return restaurantMenu;
     }
 
+
+
     private void prepareListData(JSONArray menu) {
         listDataHeader.clear();
         listDataChild.clear();
@@ -112,7 +168,7 @@ public class RestaurantMenu extends Fragment {
 
                 //get menutype from menu
                 JSONObject menu_genre = menu.getJSONObject(j);
-                //add menutype name to t6he listdataheader
+                //add menutype name to the listdataheader
                 String menu_genre_name = menu_genre.getString("name");
                 listDataHeader.add(menu_genre_name);
                 List<String> menu_items = new ArrayList<>();
@@ -154,7 +210,7 @@ public class RestaurantMenu extends Fragment {
                             Log.e("RESPONSE", response);
                             JSONObject json = new JSONObject(response);
 
-                            JSONArray menu = json.getJSONArray("menu");
+                            menu = json.getJSONArray("menu");
                             for(int j =0 ; j< menu.length() ;j++){
                                 menuTypes.add(menu.getJSONObject(j).getString("name"));
                             }
@@ -162,7 +218,11 @@ public class RestaurantMenu extends Fragment {
                                 menuGenre = menu.getJSONObject(z).getJSONArray("children");
                             }
                             for(int y =0; y < menuGenre.length(); y ++){
+
                                 menuItems.add(menuGenre.getJSONObject(y).getString("name"));
+                                menuIDs.add(menuGenre.getJSONObject(y).getString("id"));
+                                menuDescr.add(menuGenre.getJSONObject(y).getString("description"));
+                                menuPrice.add(menuGenre.getJSONObject(y).getString("price"));
                             }
 
                             prepareListData(menu);

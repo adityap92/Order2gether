@@ -59,22 +59,6 @@ public class JoinOrderFragment extends Fragment {
 
         currentAddress = (EditText) rootView.findViewById(R.id.etCurrentAddress);
         currentAddress.setText(addrCurr);
-        currentAddress.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
 
         // Get ListView object from xml
         listView = (ListView) rootView.findViewById(R.id.listView1);
@@ -92,12 +76,14 @@ public class JoinOrderFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
+                HomeScreen.cart.setName(restNames.get(position));
+                HomeScreen.cart.setMerchantID(merchID.get(position));
+                HomeScreen.cart.setLocation(addrCurr);
                 //pass arguments to other fragment
                 Bundle bundle = new Bundle();
                 bundle.putString("RestName", restNames.get(position));
                 bundle.putString("merchID", merchID.get(position));
                 bundle.putString("currAddr", addrCurr);
-                Log.e("AADFADF", restNames.get(position));
                 //add arguments to fragment
                 RestaurantMenu menu = new RestaurantMenu();
                 menu.setArguments(bundle);
@@ -118,11 +104,12 @@ public class JoinOrderFragment extends Fragment {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(rootView.getContext());
 
-        String url = "http://104.131.244.218/search?location=%22"+
-                addrCurr.trim().replaceAll(" ","%20")
-                +"%22";
+//        String url = "http://104.131.244.218/search?location=%22"+
+//                addrCurr.trim().replaceAll(" ","%20")
+//                +"%22";
+        String url = "http://104.131.244.218/search?location=%22120%20north%20ave%20nw%22";
         Log.e("URL", url);
-        //String url = "http://104.236.124.199/search?location=%22120%20north%20ave%20nw%22";
+
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,

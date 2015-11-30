@@ -11,12 +11,14 @@
             android:layout_height="wrap_content"
             android:id="@+id/etCurrentAddress"
             android:ems="12"
-            android:hint="Enter Address Here"/>
+            android:hint="Enter Address Here"
+            android:focusable="true"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Search"
-            android:id="@+id/bSearch"/>
+            android:id="@+id/bSearch"
+            android:focusable="true"/>
     </LinearLayout>
 
     <TextView
@@ -34,5 +36,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/listView1"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:focusable="true"/>
 </LinearLayout>

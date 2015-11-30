@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.Toast;
 
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
@@ -28,6 +29,8 @@ import com.google.android.gms.location.LocationServices;
 
 public class HomeScreen extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+
+    public static Cart cart;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -54,6 +57,9 @@ public class HomeScreen extends Activity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        //Create cart here
+        cart = new Cart();
     }
 
     @Override
@@ -134,6 +140,22 @@ public class HomeScreen extends Activity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+
+        if(id == R.id.checkoutCart){
+
+            if(cart.size()==0){
+                Toast.makeText(this, "Your cart is empty!", Toast.LENGTH_SHORT).show();
+            }else{
+                Fragment frag1 = new Checkout();
+
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction()
+                        .addToBackStack(null)
+                        .replace(R.id.container, frag1)
+                        .commit();
+            }
             return true;
         }
 

@@ -22,10 +22,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -33,6 +36,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationServices;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Arrays;
 
@@ -49,10 +55,16 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
     public static Double currentLat, currentLong;
     static GoogleApiClient mGoogleApiClient;
     public static String currentAddress="";
+    public static String userID;
+    public static String userName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        userID="";
+        userName="";
+
         buildGoogleApiClient();
         FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
@@ -63,6 +75,7 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
+                        getFBID();
                         openHome();
                     }
 
@@ -95,10 +108,33 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
 
     }
 
+    public void getFBID(){
+        GraphRequest request = GraphRequest.newMeRequest(
+                AccessToken.getCurrentAccessToken(),
+                new GraphRequest.GraphJSONObjectCallback() {
+                    @Override
+                    public void onCompleted(
+                            JSONObject object,
+                            GraphResponse response) {
+                        try{
+                            userID = object.getString("id");
+                            userName = object.getString("name");
+                        }catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        Log.e("FB ACCESS TOKEN", object.toString());
+                    }
+                });
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "id,name");
+        request.setParameters(parameters);
+        request.executeAsync();
+    }
+
     public void openHome(){
         Intent intent = new Intent(this, HomeScreen.class);
         startActivity(intent);
-
     }
 
     protected synchronized void buildGoogleApiClient() {

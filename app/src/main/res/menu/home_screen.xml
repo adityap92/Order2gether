@@ -3,6 +3,8 @@
     <!--<item android:id="@+id/bCreateOrder" android:title="Create Order" android:showAsAction="always"-->
         <!--/>-->
     <!--<item android:id="@+id/bJoinOrder" android:title="Join Order" android:showAsAction="always"/>-->
+    <item android:id="@+id/checkoutCart" android:icon="@drawable/cart"
+        android:title="Cart" android:showAsAction="always" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" android:showAsAction="never" />
 </menu>
