@@ -57,6 +57,7 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
     public static String currentAddress="";
     public static String userID;
     public static String userName;
+    public static Cart cart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +66,12 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
         userID="";
         userName="";
 
+        //Create cart here
+        cart = new Cart();
+
         buildGoogleApiClient();
         FacebookSdk.sdkInitialize(getApplicationContext());
+
         callbackManager = CallbackManager.Factory.create();
 
         mResultReceiver = new AddressResultReceiver(new Handler());
@@ -76,7 +81,6 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
                     @Override
                     public void onSuccess(LoginResult loginResult) {
                         getFBID();
-                        openHome();
                     }
 
                     @Override
@@ -119,6 +123,7 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
                         try{
                             userID = object.getString("id");
                             userName = object.getString("name");
+                            checkUser(userID);
                         }catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -145,6 +150,32 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
                 .build();
     }
 
+    private void checkUser(String fbid){
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(LoginPage.this);
+        String url = "http://104.131.244.218/isduplicate?fbid="+fbid;
+
+        // Request a string response from the provided URL.
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.equals("0"))
+                            signupFrag();
+                        else
+                            openHome();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("ASDFAF", "THAT DIDN'T WORK");
+            }
+        });
+
+        queue.add(stringRequest);
+    }
+
     public void signupFrag(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         // Get the layout inflater
@@ -154,20 +185,23 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(inflater.inflate(R.layout.signup_fragment, null))
                 // Add action buttons
+
                 .setPositiveButton("signup", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        // sign in the user ...
+                        // sign up the user ...
 
                         String name = ((EditText) ((Dialog) dialog).findViewById(R.id.etSignupName)).getText().toString();
-                        String email = ((EditText) ((Dialog) dialog).findViewById(R.id.etSignupEmail)).getText().toString();
+                        String venmoID = ((EditText) ((Dialog) dialog).findViewById(R.id.etVenmoID)).getText().toString();
                         String phoneNum = ((EditText) ((Dialog) dialog).findViewById(R.id.etSignupPhone)).getText().toString();
 
                         // Instantiate the RequestQueue.
                         RequestQueue queue = Volley.newRequestQueue(LoginPage.this);
-                        String url = "http://104.236.124.199/users?user%5Bname%5D=" + name.trim()
-                                +"&user%5Bemail%5D=" + email.trim()
-                                + "&user%5Bphone%5D=" + phoneNum.trim() +"&user%5Bverified%5D=0";
+                        String url = "http://104.131.244.218/users?user%5Bname%5D=" +
+                                name.trim().replace(" ", "%20") + "&user%5Bemail%5D=" +
+                                userID + "&user%5BvenmoId%5D=" +
+                                venmoID + "&user%5Bphone%5D=" +
+                                phoneNum;
 
                         // Request a string response from the provided URL.
 
@@ -176,7 +210,7 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
                                     @Override
                                     public void onResponse(String response) {
                                         // Display the first 500 characters of the response string.
-                                        Log.e("ASDF", response.substring(0, 500));
+                                        openHome();
                                     }
                                 }, new Response.ErrorListener() {
                             @Override
@@ -237,8 +271,6 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
         if (mLastLocation != null) {
             currentLat = mLastLocation.getLatitude();
             currentLong = mLastLocation.getLongitude();
-            Log.e("LAT AND LONG", currentLat+"");
-            Log.e("LAT AND LONG", currentLong+"");
         }
         startIntentService();
     }
@@ -272,7 +304,7 @@ public class LoginPage extends Activity implements GoogleApiClient.ConnectionCal
                 result=resultData.getString(Constants.RESULT_DATA_KEY);
                 //current address here
                 currentAddress = result;
-                Log.e("CURRENT ADDRESS IS:", result);
+                Log.e("CURRENT ADDRESS IS", result);
             }
 
         }

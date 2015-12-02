@@ -30,7 +30,7 @@ import com.google.android.gms.location.LocationServices;
 public class HomeScreen extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-    public static Cart cart;
+
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -57,9 +57,6 @@ public class HomeScreen extends Activity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        //Create cart here
-        cart = new Cart();
     }
 
     @Override
@@ -145,7 +142,7 @@ public class HomeScreen extends Activity
 
         if(id == R.id.checkoutCart){
 
-            if(cart.size()==0){
+            if(LoginPage.cart.size()==0){
                 Toast.makeText(this, "Your cart is empty!", Toast.LENGTH_SHORT).show();
             }else{
                 Fragment frag1 = new Checkout();

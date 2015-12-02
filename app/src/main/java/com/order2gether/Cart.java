@@ -1,5 +1,7 @@
 package com.order2gether;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 /**
@@ -40,6 +42,19 @@ public class Cart {
            list.add(c.name);
         }
         return list;
+    }
+
+    public String getCartIDs(){
+        String ids="";
+
+        for(int i = 0; i < cart.size(); i++){
+            if (i!=cart.size()-1)
+                ids += cart.get(i).getID() + "|";
+            else
+                ids += cart.get(i).getID();
+        }
+
+        return ids;
     }
 
     public int size(){
@@ -86,6 +101,10 @@ public class Cart {
             this.description = description;
             this.price = price;
             this.quantity = quantity;
+        }
+
+        public String getID(){
+            return id;
         }
 
     }

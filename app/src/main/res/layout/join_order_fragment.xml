@@ -12,13 +12,12 @@
             android:id="@+id/etCurrentAddress"
             android:ems="12"
             android:hint="Enter Address Here"
-            android:focusable="true"/>
+            />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Search"
-            android:id="@+id/bSearch"
-            android:focusable="true"/>
+            android:id="@+id/bSearch" />
     </LinearLayout>
 
     <TextView

@@ -47,7 +47,7 @@ public class JoinOrderFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.join_order_fragment, container, false);
 
-        addrCurr = getArguments().getString("addr");
+        addrCurr = LoginPage.currentAddress;
 
         bSearch = (Button) rootView.findViewById(R.id.bSearch);
         bSearch.setOnClickListener(new View.OnClickListener() {
@@ -76,9 +76,9 @@ public class JoinOrderFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                HomeScreen.cart.setName(restNames.get(position));
-                HomeScreen.cart.setMerchantID(merchID.get(position));
-                HomeScreen.cart.setLocation(addrCurr);
+                LoginPage.cart.setName(restNames.get(position));
+                LoginPage.cart.setMerchantID(merchID.get(position));
+                LoginPage.cart.setLocation(addrCurr);
                 //pass arguments to other fragment
                 Bundle bundle = new Bundle();
                 bundle.putString("RestName", restNames.get(position));
@@ -108,8 +108,6 @@ public class JoinOrderFragment extends Fragment {
 //                addrCurr.trim().replaceAll(" ","%20")
 //                +"%22";
         String url = "http://104.131.244.218/search?location=%22120%20north%20ave%20nw%22";
-        Log.e("URL", url);
-
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -118,7 +116,6 @@ public class JoinOrderFragment extends Fragment {
                     public void onResponse(String response) {
                         //parse JSON
                         try {
-                            Log.e("RESPONSE", response);
                             JSONObject json = new JSONObject(response);
 
                             for(int i = 0; i < json.names().length(); i++){
@@ -154,8 +151,6 @@ public class JoinOrderFragment extends Fragment {
         String url = "http://104.131.244.218/search?location=%22"+
                 currentAddress.getText().toString().trim().replaceAll(" ","%20")
                 +"%22";
-        Log.e("URL", url);
-        //String url = "http://104.236.124.199/search?location=%22120%20north%20ave%20nw%22";
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -164,7 +159,6 @@ public class JoinOrderFragment extends Fragment {
                     public void onResponse(String response) {
                         //parse JSON
                         try {
-                            Log.e("RESPONSE", response);
                             JSONObject json = new JSONObject(response);
 
                             for(int i = 0; i < json.names().length(); i++){

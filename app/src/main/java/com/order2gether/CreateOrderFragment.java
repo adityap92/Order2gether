@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -33,14 +34,18 @@ public class CreateOrderFragment extends Fragment {
     private Button bCreateOrder;
     private ListView listView;
     GoogleApiClient mGoogleApiClient = LoginPage.mGoogleApiClient;
-
-
+    HashMap<String, String> map = new HashMap<String, String>();
+    HashMap<String, String> orderID = new HashMap<String, String>();
     ArrayAdapter<String> adapter;
     ArrayList<String> nearbyRestaurants = new ArrayList<String>();
     String merchID="";
     String merchName="";
+    static String joinOrderID="";
+
+    //ArrayList<String> merchID;
     String currAddress=LoginPage.currentAddress;
     RequestQueue queue;
+    String minPriceReqd="";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,6 +65,9 @@ public class CreateOrderFragment extends Fragment {
         // Defined Array values to show in ListView
         nearbyRestaurants.clear();
         nearbyRestaurants.add("Loading Orders..");
+
+        //orderID = new ArrayList<String>();
+        //merchID = new ArrayList<String >();
 
 
         // Define a new Adapter
@@ -81,6 +89,15 @@ public class CreateOrderFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
+                //pass arguments to other fragment
+                Bundle bundle = new Bundle();
+                bundle.putString("merchID", map.get(nearbyRestaurants.get(position)));
+                bundle.putString("RestName", nearbyRestaurants.get(position));
+                joinOrderID = orderID.get(map.get(nearbyRestaurants.get(position)));
+                //add arguments to fragment
+                RestaurantMenu menu = new RestaurantMenu();
+                menu.setArguments(bundle);
+                getFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.container, menu).commit();
             }
         });
 
@@ -91,14 +108,10 @@ public class CreateOrderFragment extends Fragment {
     }
 
     private void getNearbyOrders(String address) {
-
-
         // Instantiate the RequestQueue.
         queue = Volley.newRequestQueue(createOrder.getContext());
 
         String url = "http://104.131.244.218/orderbylocation?user_location=%22" + address.trim().replaceAll(" ","%20")+ "%22";
-        Log.e("URL", url);
-
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -107,17 +120,16 @@ public class CreateOrderFragment extends Fragment {
                     public void onResponse(String response) {
                         //parse JSON
                         try {
-                            Log.e("RESPONSE ID", response);
                             JSONArray json = new JSONArray(response);
-
-                            merchID = json.getJSONObject(0).getString("merchantID");
-                            Log.e("MERCH ID:", merchID);
-
-                            getRestaurantName();
+                            for(int i = 0; i < json.length(); i++ ){
+                                merchID = json.getJSONObject(i).getString("merchantID");
+                                //orderID.add(json.getJSONObject(i).getString("id"));
+                                orderID.put(merchID, json.getJSONObject(i).getString("id"));
+                                getRestaurantName(merchID);
+                            }
 
                         } catch (Exception e) {
                             Log.e("JSON", e.toString());
-
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -128,13 +140,10 @@ public class CreateOrderFragment extends Fragment {
         });
 
         queue.add(stringRequest);
-
     }
 
-    private void getRestaurantName(){
-        String url1 = "http://sandbox.delivery.com/merchant/" + merchID + "/?client_id=MTExNTBjNTgyOGQ0NTFiOTc0ZWI1MTg1MGQ3NmYxYjE3";
-        Log.e("URL", url1);
-
+    private void getRestaurantName(String id){
+        String url1 = "http://sandbox.delivery.com/merchant/" + id + "/?client_id=MTExNTBjNTgyOGQ0NTFiOTc0ZWI1MTg1MGQ3NmYxYjE3";
 
         // Request a string response from the provided URL.
         StringRequest stringRequest1 = new StringRequest(Request.Method.GET, url1,
@@ -143,14 +152,16 @@ public class CreateOrderFragment extends Fragment {
                     public void onResponse(String response) {
                         //parse JSON
                         try {
-                            Log.e("RESPONSE Name", response);
                             JSONObject json = new JSONObject(response);
                             JSONObject merchant = json.getJSONObject("merchant");
                             JSONObject merchantName = merchant.getJSONObject("summary");
+                            minPriceReqd = merchant.getJSONObject("ordering").getJSONObject("minimum").getJSONObject("delivery").getString("lowest");
                             merchName = merchantName.getString("name");
-                            nearbyRestaurants.clear();
+                            if(nearbyRestaurants.get(0).equals("Loading Orders.."))
+                                nearbyRestaurants.remove(0);
                             nearbyRestaurants.add(merchName);
-                            Log.e("MERCH NAME:", merchName);
+                            map.put(merchName, merchant.getString("id"));
+
 
                             adapter.notifyDataSetChanged();
                         } catch (Exception e) {

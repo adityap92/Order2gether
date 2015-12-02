@@ -3,6 +3,7 @@ package com.order2gether;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import android.widget.ListView;
 public class MyOrders extends Fragment {
     View rootView;
     ListView listView;
+    String[] values;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -24,20 +27,15 @@ public class MyOrders extends Fragment {
         // Get ListView object from xml
         listView = (ListView) rootView.findViewById(R.id.myOrderList);
 
-        // Defined Array values to show in ListView
-        String[] values = new String[] {
-                "Great Taco - 57%"
-        };
 
-        // Define a new Adapter
-        // First parameter - Context
-        // Second parameter - Layout for the row
-        // Third parameter - ID of the TextView to which the data is written
-        // Forth - the Array of data
 
+        if(LoginPage.cart.size()==0){
+            values = new String[]{ "No items in your cart!" };
+        }else {
+            values = LoginPage.cart.getCartItems().toArray(new String[LoginPage.cart.size()]);
+        }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_list_item_1, android.R.id.text1, values);
-
 
         // Assign adapter to ListView
         listView.setAdapter(adapter);

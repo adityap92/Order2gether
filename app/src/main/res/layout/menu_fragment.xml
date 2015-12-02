@@ -9,6 +9,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@android:color/black"
         android:id="@+id/tvMenuName"
+        android:text="Click an item to add it to the cart!"
         android:background="@android:color/holo_blue_light"/>
 
     <ExpandableListView

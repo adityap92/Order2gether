@@ -39,7 +39,8 @@ public class RestaurantMenu extends Fragment {
 
     View restaurantMenu;
     private TextView restaurantName;
-    String addrCurr, merchID;
+    String merchID;
+    static String minPriceReqd="";
     ArrayList<String> menuItems, menuTypes, menuIDs, menuPrice, menuDescr;
     JSONArray menuGenre= new JSONArray();
     ExpandableListAdapter listAdapter;
@@ -49,6 +50,7 @@ public class RestaurantMenu extends Fragment {
     String selItemName="";
     JSONArray menu;
     NumberPicker np;
+    RequestQueue queue;
 
     @Nullable
     @Override
@@ -60,8 +62,6 @@ public class RestaurantMenu extends Fragment {
         menuIDs = new ArrayList<String>();
         menuDescr = new ArrayList<String>();
         menuPrice = new ArrayList<String>();
-
-
 
         expListView = (ExpandableListView) restaurantMenu.findViewById(R.id.lvMenu);
 
@@ -89,7 +89,7 @@ public class RestaurantMenu extends Fragment {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
 
-                                for(int j =0 ; j< menu.length() ;j++) {
+                                for (int j = 0; j < menu.length(); j++) {
                                     //headers
                                     try {
                                         //get menutype from menu
@@ -106,14 +106,17 @@ public class RestaurantMenu extends Fragment {
                                         for (int item_index = 0; item_index < menu_item_array.length(); item_index++) {
                                             //menu item name
                                             String menu_item_name = menu_item_array.getJSONObject(item_index).getString("name");
-                                            if(menu_item_name.equals(selItemName)){
+                                            if (menu_item_name.equals(selItemName)) {
                                                 String name = menu_item_name;
                                                 String itemId = menu_item_array.getJSONObject(item_index).getString("id");
                                                 String description = menu_item_array.getJSONObject(item_index).getString("description");
                                                 String price = menu_item_array.getJSONObject(item_index).getString("price");
 
-                                                if(np.getValue()>0)
-                                                    HomeScreen.cart.addToCart(name, itemId, description, Double.parseDouble(price), np.getValue());
+                                                if (np.getValue() > 0) {
+                                                    LoginPage.cart.addToCart(name, itemId, description, Double.parseDouble(price), np.getValue());
+                                                    Toast.makeText(getActivity().getApplicationContext(),
+                                                            "Item added to Cart!", Toast.LENGTH_SHORT).show();
+                                                }
                                                 break;
                                             }
                                         }
@@ -121,9 +124,6 @@ public class RestaurantMenu extends Fragment {
 
                                     }
                                 }
-                                    Toast.makeText(getActivity().getApplicationContext(),
-                                            "Item added to Cart!", Toast.LENGTH_SHORT).show();
-                                Log.e("NUM ITEMS IN CART:", HomeScreen.cart.size()+"");
 
                             }
                         })
@@ -135,9 +135,6 @@ public class RestaurantMenu extends Fragment {
                                 listDataHeader.get(groupPosition)).get(
                                 childPosition));
 
-
-
-
                 np.setMinValue(0);
                 np.setMaxValue(5);
                 np.setWrapSelectorWheel(false);
@@ -148,13 +145,49 @@ public class RestaurantMenu extends Fragment {
         });
 
         restaurantName = (TextView) restaurantMenu.findViewById(R.id.tvMenuName);
-        restaurantName.setText(getArguments().getString("RestName"));
-        addrCurr=getArguments().getString("currAddr");
-        merchID = getArguments().getString("merchID");
+        if(!getArguments().getString("RestName").equals("")){
+            restaurantName.setText(getArguments().getString("RestName"));
+            LoginPage.cart.setName(getArguments().getString("RestName"));
+        }
 
-        getMenu();
+
+        merchID = getArguments().getString("merchID");
+        getRestaurantMinimum(merchID);
+        getMenu(merchID);
 
         return restaurantMenu;
+    }
+
+    private void getRestaurantMinimum(String id){
+        queue = Volley.newRequestQueue(restaurantMenu.getContext());
+        String url1 = "http://sandbox.delivery.com/merchant/" + id + "/?client_id=MTExNTBjNTgyOGQ0NTFiOTc0ZWI1MTg1MGQ3NmYxYjE3";
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest1 = new StringRequest(Request.Method.GET, url1,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //parse JSON
+                        try {
+                            JSONObject json = new JSONObject(response);
+                            JSONObject merchant = json.getJSONObject("merchant");
+                            RestaurantMenu.minPriceReqd = merchant.getJSONObject("ordering")
+                                    .getJSONObject("minimum")
+                                    .getJSONObject("delivery")
+                                    .getString("lowest");
+                        } catch (Exception e) {
+                            Log.e("JSON", e.toString());
+
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("ERROR", error.toString());
+            }
+        });
+
+        queue.add(stringRequest1);
     }
 
 
@@ -189,16 +222,12 @@ public class RestaurantMenu extends Fragment {
 
     }
 
-    public void getMenu(){
+    public void getMenu(String id){
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(restaurantMenu.getContext());
 
-//        String url = "http://104.131.244.218/search?location=%22"+
-//                addrCurr.trim().replaceAll(" ","%20")
-//                +"%22";
-        String url = "http://sandbox.delivery.com/merchant/"+merchID+"/menu?client_id=MTExNTBjNTgyOGQ0NTFiOTc0ZWI1MTg1MGQ3NmYxYjE3";
+        String url = "http://sandbox.delivery.com/merchant/"+id+"/menu?client_id=MTExNTBjNTgyOGQ0NTFiOTc0ZWI1MTg1MGQ3NmYxYjE3";
         Log.e("URL", url);
-
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,

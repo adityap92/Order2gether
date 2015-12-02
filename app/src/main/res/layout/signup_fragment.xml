@@ -13,20 +13,8 @@ android:gravity="center">
 <EditText
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:hint="email address"
-    android:id="@+id/etSignupEmail" />
-
-<EditText
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="password"
-    android:id="@+id/etSignupPass" />
-
-<EditText
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="re-enter password"
-    android:id="@+id/etSignupPassAgain" />
+    android:hint="Venmo ID"
+    android:id="@+id/etVenmoID" />
 
     <EditText
         android:layout_width="match_parent"
